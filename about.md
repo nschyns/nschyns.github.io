@@ -4,12 +4,8 @@ title: About
 permalink: /about/
 ---
 
-Some information about you!
+This site is designed to provide instructions for carrying out labs with the aim of discovering the main aspects of deploying wireless enterprise networks, using the Cisco 9800 wireless controller.
 
-### More Information
+### Contact me !
 
-A place to include any other types of information that you'd like to include about yourself.
-
-### Contact me
-
-[email@domain.com](mailto:email@domain.com)
+Noé Schyns : [nschyns@cisco.com](mailto:nschyns@cisco.com)
