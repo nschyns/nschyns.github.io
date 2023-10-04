@@ -133,8 +133,8 @@ Since all the wireless client traffic will be switched locally, the client VLANs
 Here is a table showing the VLANs that will be used for the wireless clients :
 
 | VLAN name  | VLAN ID  |
-
 |----------|----------|
+
 | VLAN30    | 30    |
 | VLAN40    | 40    |
 
@@ -162,8 +162,8 @@ There are three main components to configure on the 9800 controller when creatin
 You first need to create the WLAN ((`Configuration > Tags & Profile > WLANs`)) configuration with the following information :
 
 | WLAN Name  | Security |
-
 |----------|----------|
+
 | Pod-X-Open   | None    |
 
 Once done, you can move to the creation of the policy profile that you will link the WLAN with. 
@@ -173,8 +173,8 @@ Once done, you can move to the creation of the policy profile that you will link
 You then need to create a new policy profile (`Configuration > Tags & Profile > Policy`) where you will configure the following information : 
 
 | Name  | Status  | WLAN switching policy  | VLAN  |
-
 |----------|----------|----------|----------|
+
 | PP_VLAN_30    | Enabled    | Central switching : disabled<br />Central Authentication : enabled<br />Central DHCP : disabled| 30 |
 
 
@@ -183,6 +183,8 @@ You then need to create a new policy profile (`Configuration > Tags & Profile > 
 Now, it's time to t**ie the WLAN configuration with the policy profile**. This is done using the "policy tags". Navigate to `Configuration > Tags & Profile > Tags > Policy`, select the default policy tag and add your newly create WLAN and associated policy profile and save.
 
 Check that your access point is correclty configured : go to `Monitoring > Wireless > AP Statistics` and click the first blue icon next to your access point name. This will show you what is being broadcasted by your access point.
+
+
 
 
 ## Step 5 : PSK SSID
