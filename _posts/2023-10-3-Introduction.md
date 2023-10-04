@@ -87,9 +87,65 @@ After the AP downloaded the image from the controller, it should reboot and come
 
 Navigate to `Monitoring > Wireless > AP Statistics` to check if the AP has joined and is "Registered". You should be able to see the MAC/IP address of the access point, the AP model etc. 
 
-![Main dashboard]({{ site.baseurl }}/images/ap_joined.png)
+![AP join]({{ site.baseurl }}/images/ap_joined.png)
 
-## Step 3 :Configure the access point 
+
+## Step 3 : Configure the access point 
+
+As a quick test, change the AP name from the 9800 controller and check if this is reflected on the AP console. To change the AP name, go to `Configuration > Wireless > Access Points`, click on the access point and change the name, then click on "Update & Apply". 
+
+Console/SSH to the access point and you should see the name of the access has changed.
+
+![AP name]({{ site.baseurl }}/images/ap-name.png)
+
+> If SSH is disabled on the access point (if you can ping it but cannot establish SSH connection to it), then go to `Configuration > Tags & Profile > AP Join`, select the "default-ap-profile" and configure the following : 
+> - Under `Management > User`, configure a username and password + secret
+> - Under `Management > Device`, check the "SSH" checkbox 
+> - Update & Apply to device 
+
+Next step will be to convert this access point from "Local" mode to "Flexconnect" mode. This will allow us to decide where the traffic will be released (at the controller level vs at the AP level) for each SSID configured.
+
+To modify the mode of the access point, you will need to [**create a new "site tag"**](#create-a-new-site-tag), which will be configured as a remote site, to simulate the fact that your AP is in a remote location and that you want the AP to be in Flex connect mode. 
+
+As a reminder, there are 3 types of tag : 
+- **Policy Tag**: This tag links a WLAN Profile (SSID) to a Policy Profile.
+- **Site Tag**: This tag defines the AP mode and other AP settings through the AP join profile and Flex profile.
+- **RF Tag**: This tag sets the RF profiles with the settings for each band.
+
+![Configuration model]({{ site.baseurl }}/images/config-model.png)
+
+#### Create a new site tag
+
+To create a new site tag, go to `Configuration > Tags & Profiles > Tags > Site`, click "Add" and create new site tag called "flex-site-tag" and uncheck the "Enable Local Site" checkbox. You can leave other values as default.
+
+![Flex site tag]({{ site.baseurl }}/images/flex-site-tag.png)
+
+The next step is to apply this site tag to your access point to convert it to Flex mode. To do this, go to `Configuration > Wireless > Access Points`, click on the access point and change the site tag to the newly created site tag "flex-site-tag" and click "Update & Apply". This will reset the CAPWAP tunnel between the AP and the WLC, and in addition the AP will reboot to change its mode. After a few minutes, you should see the AP again under `Configuration > Wireless > Access Points` and you can verify its mode is changed to "Flex" :
+
+![Flex mode]({{ site.baseurl }}/images/AP-flex-mode.png)
+
+#### Configure the flex profile
+
+For this lab, we will decide to **switch the wireless client traffic locally**, meaning that all the traffic coming from the wireless client will be release at the AP level and forwared to the switch. Another possiblity is to centrally switch the traffic to the controller, and in this case all the wireless clients traffic is encapsulated inside a CAPWAP tunnel and forwared to the controller. 
+
+Since all the wireless client traffic will be switched locally, the client VLANs needs to be configured on the access point. This is done through the "flex profile" (remember, everything is configured through the WLC, not on the AP direclty).
+
+Here is a table showing the VLANs that will be used for the wireless clients :
+
+| VLAN name  | VLAN ID  |
+|----------|----------|
+| VLAN30    | 30    |
+| VLAN40    | 40    |
+
+Note : you will need to configure an SVI in these VLANs on your switch and create a DHCP pool for both VLANs. This will allow the wirless clients to get an IP address when connecting to the SSIDs. 
+
+Go to `Configuration > Tags & Profiles > Flex`, select the default-flex-profile and configure the following things : 
+- Under the `General` tab, enter the native VLAN. This should be the native VLAN configured on the trunk interface where your AP is connected
+- Under "the `VLAN` tab, add the VLANs that will be used for your clients (VLAN 30 and 40)
+
+Sanity check : console/SSH to access point and verify the VLANs are present on the AP : `#show flexconnect vlan-name`
+
+You are now ready to configure your very first SSID ! 
 
 ## Step 4 : Open SSID
 
