@@ -114,7 +114,7 @@ As a reminder, there are 3 types of tag :
 
 ![Configuration model]({{ site.baseurl }}/images/config-model.png)
 
-#### Create a new site tag
+### Create a new site tag
 
 To create a new site tag, go to `Configuration > Tags & Profiles > Tags > Site`, click "Add" and create new site tag called "flex-site-tag" and uncheck the "Enable Local Site" checkbox. You can leave other values as default.
 
@@ -124,7 +124,7 @@ The next step is to apply this site tag to your access point to convert it to Fl
 
 ![Flex mode]({{ site.baseurl }}/images/AP-flex-mode.png)
 
-#### Configure the flex profile
+### Configure the flex profile
 
 For this lab, we will decide to **switch the wireless client traffic locally**, meaning that all the traffic coming from the wireless client will be release at the AP level and forwared to the switch. Another possiblity is to centrally switch the traffic to the controller, and in this case all the wireless clients traffic is encapsulated inside a CAPWAP tunnel and forwared to the controller. 
 
@@ -133,6 +133,7 @@ Since all the wireless client traffic will be switched locally, the client VLANs
 Here is a table showing the VLANs that will be used for the wireless clients :
 
 | VLAN name  | VLAN ID  |
+
 |----------|----------|
 | VLAN30    | 30    |
 | VLAN40    | 40    |
@@ -148,6 +149,41 @@ Sanity check : console/SSH to access point and verify the VLANs are present on t
 You are now ready to configure your very first SSID ! 
 
 ## Step 4 : Open SSID
+
+Here is the interesting part : you will now learn how to create your very first SSID. This is fairly simple and does not require a lot of configuration. Your instructor will show you how to create a simple SSID and you will try to replicate this and be able to test it with your own devices.
+
+There are three main components to configure on the 9800 controller when creating an SSID : 
+1. The [**WLAN** configuration](#wlan-configuration) : SSID name, security (open, PSK, 802.1X) etc.
+2. The [**policy profile** configuration](#policy-profile-configuration) : where you configure the VLAN used by the clients, timers etc.
+3. The [**policy tag** configuration](#policy-tag-configuration), used to combine the WLAN and the policy profile. The current policy tag applied to your AP is the "default policy tag" and we will keep this one. 
+
+### WLAN configuration 
+
+You first need to create the WLAN ((`Configuration > Tags & Profile > WLANs`)) configuration with the following information :
+
+| WLAN Name  | Security |
+
+|----------|----------|
+| Pod-X-Open   | None    |
+
+Once done, you can move to the creation of the policy profile that you will link the WLAN with. 
+
+### Policy profile configuration
+
+You then need to create a new policy profile (`Configuration > Tags & Profile > Policy`) where you will configure the following information : 
+
+| Name  | Status  | WLAN switching policy  | VLAN  |
+
+|----------|----------|----------|----------|
+| PP_VLAN_30    | Enabled    | Central switching : disabled<br />Central Authentication : enabled<br />Central DHCP : disabled| 30 |
+
+
+### Policy tag configuration
+
+Now, it's time to t**ie the WLAN configuration with the policy profile**. This is done using the "policy tags". Navigate to `Configuration > Tags & Profile > Tags > Policy`, select the default policy tag and add your newly create WLAN and associated policy profile and save.
+
+Check that your access point is correclty configured : go to `Monitoring > Wireless > AP Statistics` and click the first blue icon next to your access point name. This will show you what is being broadcasted by your access point.
+
 
 ## Step 5 : PSK SSID
 
