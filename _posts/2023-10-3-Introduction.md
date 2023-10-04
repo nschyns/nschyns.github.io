@@ -134,7 +134,6 @@ Here is a table showing the VLANs that will be used for the wireless clients :
 
 | VLAN name  | VLAN ID  |
 |----------|----------|
-
 | VLAN30    | 30    |
 | VLAN40    | 40    |
 
@@ -163,7 +162,6 @@ You first need to create the WLAN ((`Configuration > Tags & Profile > WLANs`)) c
 
 | WLAN Name  | Security |
 |----------|----------|
-
 | Pod-X-Open   | None    |
 
 Once done, you can move to the creation of the policy profile that you will link the WLAN with. 
@@ -174,7 +172,6 @@ You then need to create a new policy profile (`Configuration > Tags & Profile > 
 
 | Name  | Status  | WLAN switching policy  | VLAN  |
 |----------|----------|----------|----------|
-
 | PP_VLAN_30    | Enabled    | Central switching : disabled<br />Central Authentication : enabled<br />Central DHCP : disabled| 30 |
 
 
