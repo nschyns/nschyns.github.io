@@ -156,19 +156,25 @@ There are three main components to configure on the 9800 controller when creatin
 2. The [**policy profile** configuration](#policy-profile-configuration) : where you configure the VLAN used by the clients, timers etc.
 3. The [**policy tag** configuration](#policy-tag-configuration), used to combine the WLAN and the policy profile. The current policy tag applied to your AP is the "default policy tag" and we will keep this one. 
 
+Instead of going on each component and configure them separately, you can use a wizard that will help you to configure them all in the same place. You can access the wizard by clicking this icon : 
+
+![WLAN wizard]({{ site.baseurl }}/images/wlan-wizard.png)
+
+Once on the wizard page, click "Start Now" at the bottom of the page and start configuring the following items : WLAN profile, policy profile and policy tag (for this last one, do not create a new one but use the default-policy-tag already created by default). 
+
 ### WLAN configuration 
 
-You first need to create the WLAN ((`Configuration > Tags & Profile > WLANs`)) configuration with the following information :
+You first need to create the WLAN configuration with the following information :
 
 | WLAN Name  | Security |
 |----------|----------|
 | Pod-X-Open   | None    |
 
-Once done, you can move to the creation of the policy profile that you will link the WLAN with. 
+Once done, you can move to the creation of the policy profile that will be linked to the policy profile through the policy tag. 
 
 ### Policy profile configuration
 
-You then need to create a new policy profile (`Configuration > Tags & Profile > Policy`) where you will configure the following information : 
+You then need to create a new policy profile where you will configure the following information : 
 
 | Name  | Status  | WLAN switching policy  | VLAN  |
 |----------|----------|----------|----------|
@@ -177,17 +183,112 @@ You then need to create a new policy profile (`Configuration > Tags & Profile > 
 
 ### Policy tag configuration
 
-Now, it's time to t**ie the WLAN configuration with the policy profile**. This is done using the "policy tags". Navigate to `Configuration > Tags & Profile > Tags > Policy`, select the default policy tag and add your newly create WLAN and associated policy profile and save.
+Now, it's time to **tie the WLAN configuration with the policy profile**. This is done using the "policy tags". Under "Policy tags", select the default policy tag and add your newly created WLAN and associated policy profile and save.
 
-Check that your access point is correclty configured : go to `Monitoring > Wireless > AP Statistics` and click the first blue icon next to your access point name. This will show you what is being broadcasted by your access point.
+C**heck that your access point is correclty configured** : go to `Monitoring > Wireless > AP Statistics` and click the first blue icon next to your access point name. This will show you what is being broadcasted by your access point.
 
+![APs SSIDs]({{ site.baseurl }}/images/AP-broadcast.png)
 
+### Connect your wireless client
 
+If you take your phone or laptop, you should see your SSID being broadcasted. You can attempt to connect to it. You should get an IP address from VLAN 30 and be able to access other ressources in this network. You can try to ping your gateway (which should be the SVI configured on the switch) to test the wireless connectivity. 
+
+If you can ping your gateway, it means you successfully configured your SSID !
 
 ## Step 5 : PSK SSID
 
+Sky is the limit! You can now configure any type of SSID. One of the most common securities seen on enterprise wireless networks are PSK and 802.1X. Configuring a 802.1X SSID requires the use of a RADIUS server, which we will do in our next lab session. 
+
+You will configure here a PSK SSID. Here are the steps to do (you should be able to configure this pretty easily if you managed to create the open SSID) : 
+1. Create a new SSID "Pod-X-PSK", using PSK as security. Define a password for this SSID.
+2. Create a new policy profile "PP_VLAN_40", use the same switching policy and use VLAN 40
+3. In the default-policy-tag, you can add this SSID/policy profile. Once added to the policy tag, you should see your new PSK SSID being broadcasted in addition to the open SSID. 
+
 ## Step 6 : Monitoring the AP and wireless clients
+
+Once you connected a wireless client to your SSID, you should see it appearing under `Monitoring > Wireless > Clients`. This is where all clients connected to your wireless network will appear. 
+
+By clicking on your client, you will get a lot of information : to which AP is it connected to, its received signal strength (RSSI), IP/MAC addresses, VLAN being used etc.
+
+### Device profiling
+
+It is also possible to get some profiling information about the clients connected to the controller and get more information about them. The 9800 is capable of using 3 differents methods to learn more about the clients :
+- **MAC**
+- **DHCP profiling** : uses information present in the DHCP packets 
+- **HTTP profiling** : uses information present in the HTTP packets 
+
+In order for Local profiling to work, simply enable "Device Classification" under Configuration > Wireless > Wireless Global. This option enables MAC OUI, HTTP and DHCP profiling at the same time :
+
+![Device profiling]({{ site.baseurl }}/images/device-profiling.png)
+
+You can then go to `Monitoring > Services > Local profiling` to see how the 9800 controller detected your devices.
+
+Document explaining device profiling in details available [here](https://www.cisco.com/c/en/us/support/docs/wireless/catalyst-9800-series-wireless-controllers/215661-in-depth-look-into-client-profiling-on-9.html)
+
 
 ## Step 7 : Over the Air capture analysis
 
+An interesting step in understanding the association/authentication flow between a wireless client and an access point is to take an Over the Air (OTA) capture when the client is associating to the SSID. 
+
+![Wireless association]({{ site.baseurl }}/images/authentication-flow.png)
+[Image credit](https://community.nxp.com/t5/Wireless-Connectivity-Knowledge/802-11-Wi-Fi-Security-Concepts/ta-p/1163551)
+
+This can be done either using a laptop with the right wireless adapter (such as a MacBook), or using an AP in sniffer mode. Since not everyone might have such laptop, we will be working with sniffer mode access points. One group will setup its access point in sniffer mode, and the other group will initate the connection from one of their wireless device to their own SSID. 
+
+Group 1 : Will configure the sniffer mode access point
+Group 2 : Will configure the access point channel to a custom channel and handle client connections/disconnections
+
+Odd pod number will configure their access point to sniff on a specific channel :
+
+| Pod 1  | Pod 3  | Pod 5  | Pod 7  | Pod 9  |
+|----------|----------|----------|----------|----------|
+| Sniff on 36   | Sniff on 40    | Sniff on 44   | Sniff on 48    | Sniff on 52    |
+
+Even pod number will configure their access point to broadcast on a specific channel :
+
+| Pod 2  | Pod 4  | Pod 6  | Pod 8  | Pod 10  |
+|----------|----------|----------|----------|----------|
+| Broadcast on 36    | Broadcast on 40    | Broadcast on 44    | Broadcast on 48    | Broadcast on 52  |
+
+
+### Group 1 : Configure an access point in sniffer mode
+
+To configure an access point in sniffer mode, you will need to go to `Configuration > Wireless > Access Points`, select the access point, the change the "AP mode" to "Sniffer". The AP will rejoin the WLC and you will then be able to configure the sniffing channel and where to send the captured data.
+
+To configure on which channel the AP will be listening, go to `Configuration > Wireless > Access Points`, expand the 5ghz band section, select the access point, then enable sniffing, select the channel you will sniff on and specify the IP address of the laptop on which Wireshark will run. 
+
+In the "RF Channel Assignment" section, please make sure to set the assignment method to "Custom" and specify the channel width to 20Mhz and set the channel to the one you would like to sniff on (see table above). 
+
+The data you will capture over the air needs to be sent somewhere. In our case, it will be a wired laptop (in the same VLAN of the controller) running Wireshark. 
+
+Side note : ensure that the 9800 controller can reach the laptop running Wireshark, using a ping for example. 
+
+#### Decode captured data
+
+At this point, the AP is forwarding every packets seen on the channel you are sniffing on. However, these packets are encapsulated and you will need to decode them to see their content. To do this, you can stop the capture, right-click on a packet, select "Decode As" and then select "PEEKREMOTE".
+
+![PEEKREMOTE]({{ site.baseurl }}/images/peekremote.png)
+
+Wait for group 2 to finish its work and then try to start the capture, disconnect/connect a wireless client and stop the capture and try to find the following frames : 
+- Beacons for your SSID
+- Authentication request/response
+- Association request/response
+- 4-way handshake (M1, M2, M3, M4)
+
+### Group 2 : Configure the channel of the access point
+
+The point here will be to manually force the access point to broadcast on a specific channel (with a specific width). This will allow group 1 to sniff on the correct channel. 
+
+To force an access point to broadcast on a specific channel, go to `Configuration > Wireless > Access Points`, in the "5Ghz band" section, select the access point, then go to the "RF Channel Assignment" section, select "Custom" for the assignment method and configure the channel as per the table above. Make sure to also configure the channel width to 20 Mhz in this case.
+
+At this point, your AP will broadcast on the channel configured. You can verify this using a simple Wifi Analyzer tool on your laptop that analyzes the RF environment for example.
+
+Once group 1 has configured its access point on sniffer mode, you can disconnect/reconnect a wireless client to generate the interesting traffic (association/authentication).
+
 ## Step 8 : Cubietruck & ZoiPer
+
+This step consists of using your Cubietruck to handle call over wireless. You will need to have ZoiPer (softphone) installed on your wirless clients. 
+
+You can connect your Cubietruck to your switch, place it in a specific VLAN (additionnal VLAN that you will create on the switch along with a SVI) and make sure it gets an IP address from a newly created DHCP pool.
+
+Then, you can connect a wirless client to your SSID and try to reach the Cubietruck IP address. Once done, then you can start initiating phone calls between your wireless clients using the softphone.

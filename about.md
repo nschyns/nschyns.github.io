@@ -8,7 +8,7 @@ This site is designed to provide instructions for carrying out labs with the aim
 
 ### References
 
-All images/assets on this website have been downloaded from the [Cisco website](www.cisco.com).
+All images/assets on this website have been downloaded from the [Cisco website](www.cisco.com), unless specified otherwise.
 
 ### Contact me !
 Noé Schyns : [nschyns@cisco.com](mailto:nschyns@cisco.com)
