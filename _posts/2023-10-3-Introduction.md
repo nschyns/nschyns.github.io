@@ -56,8 +56,10 @@ Technical Support: http://www.cisco.com/techsupport
 
 The next step is to join your access point (AP) to your controller. To join a lightweight access point to the controller, the AP needs to have the following :
 - An IP address
-- Learn the IP address of the controller, using DHCP option 43
+- Learn the IP address of the controller, using DHCP option 43 in this lab
 - IP reachability towards the controller
+
+![AP Join]({{ site.baseurl }}/images/ap-join.png)
 
 Therefore, to accomplish this task, you will need to do the following :
 1. Create a DHCP pool for your managment VLAN (VLAN used for the access points, choose any VLAN)
@@ -228,6 +230,7 @@ Document explaining device profiling in details available [here](https://www.cis
 An interesting step in understanding the association/authentication flow between a wireless client and an access point is to take an Over the Air (OTA) capture when the client is associating to the SSID. 
 
 ![Wireless association]({{ site.baseurl }}/images/authentication-flow.png)
+
 [Image credit](https://community.nxp.com/t5/Wireless-Connectivity-Knowledge/802-11-Wi-Fi-Security-Concepts/ta-p/1163551)
 
 This can be done either using a laptop with the right wireless adapter (such as a MacBook), or using an AP in sniffer mode. Since not everyone might have such laptop, we will be working with sniffer mode access points. One group will setup its access point in sniffer mode, and the other group will initate the connection from one of their wireless device to their own SSID. 
