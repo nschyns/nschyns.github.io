@@ -12,20 +12,31 @@ This lab is designed to introduce the concepts of deploying an enterprise wirele
 In this lab, you will learn the basic concepts of the deployment of wireless network in an enterprise environment. You will learn how to join an access point to the 9800 controller, configure the access point, create a basic SSID configuration, analyze what is sent over-the-air when a wireless clients associate with an access point and many other things.
 
 Here is a brief summary of the steps involved in this lab :
-1. Access the 9800 controller using SSH and the GUI
-2. Join the access point to the controller
-3. Configure the access point in Flex connect mode
-4. Create an open SSID
-5. Create a SSID with PSK encryption 
-6. Explore monitoring capabilties on the controller
-7. Perform an OTA (Over the Air) capture (instructor led)
-8. Use the Cubietruck and ZoiPer over wireless
+1. Step 1 : Access the 9800 controller using SSH and the GUI
+2. Step 2 : Join the access point to the controller
+3. Step 3 : Configure the access point in Flex connect mode
+4. Step 4 : Create an open SSID
+5. Step 5 : Create a SSID with PSK encryption 
+6. Step 6 : Explore monitoring capabilties on the controller
+7. Step 7 : Perform an OTA (Over the Air) capture (instructor led)
+8. Step 8 : Use the Cubietruck and ZoiPer over wireless
 
 ## Step 1 : Access the 9800 wireless controller
 
 The very first thing you will do during this session is to access the 9800 controller using SSH and the Graphical User Interface (GUI). Using the GUI is one of the preferred way to configure the controller, but SSH access is usually also required to perform some tasks.
 
-In this lab, you can setup a static IP address on your laptop in the same range as the wireless controller (IP address will be given by the instructor). Make sure you have IP reachability towards the 9800 controller before going further in this lab.
+In this lab, you can setup a static IP address on your laptop in the same range/VLAN as the wireless controller (IP address of the WLC is : 192.168.2.204). The VLAN will be given by your instructor. Make sure you have IP reachability towards the 9800 controller before going further in this lab.
+
+### GUI access 
+
+Check if you can access the 9800 GUI using a browser :
+`https://<WLC_IP_ADRESS>`
+
+Enter the username/password provided by your instructor to access the main dashboard. You should get a page similar to this one : 
+
+![Main dashboard]({{ site.baseurl }}/images/dashboard.png)
+
+You are now able to access the 9800 wireless controller and ready to start ! 
 
 ### SSH access 
 
@@ -40,17 +51,6 @@ Cisco IOS XE Software, Version 17.03.07
 Cisco IOS Software [Amsterdam], C9800-CL Software (C9800-CL-K9_IOSXE), Version 17.3.7, RELEASE SOFTWARE (fc3)
 Technical Support: http://www.cisco.com/techsupport
 ```
-
-### GUI access 
-
-Once SSH access is established, check if you can access the 9800 GUI using a browser :
-`https://<WLC_IP_ADRESS>`
-
-Enter the username/password provided by your instructor to access the main dashboard. You should get a page similar to this one : 
-
-![Main dashboard]({{ site.baseurl }}/images/dashboard.png)
-
-You are now able to access the 9800 wireless controller and ready to start ! 
 
 ## Step 2 : Join the access point
 
@@ -130,12 +130,9 @@ For this lab, we will decide to **switch the wireless client traffic locally**, 
 
 Since all the wireless client traffic will be switched locally, the client VLANs needs to be configured on the access point. This is done through the "flex profile" (remember, everything is configured through the WLC, not on the AP direclty).
 
-Here is a table showing the VLANs that will be used for the wireless clients :
-
-| VLAN name  | VLAN ID  |
-|----------|----------|
-| VLAN30    | 30    |
-| VLAN40    | 40    |
+Here are the VLANs that will be used for the wireless clients :
+- **Vlan name** : VLAN30 (ID : 30)
+- **Vlan name** : VLAN40 (ID : 40)
 
 Note : you will need to configure an SVI in these VLANs on your switch and create a DHCP pool for both VLANs. This will allow the wirless clients to get an IP address when connecting to the SSIDs. 
 
@@ -165,29 +162,29 @@ Once on the wizard page, click "Start Now" at the bottom of the page and start c
 ### WLAN configuration 
 
 You first need to create the WLAN configuration with the following information :
-
-| WLAN Name  | Security |
-|----------|----------|
-| Pod-X-Open   | None    |
+- **WLAN name** : Pod-X-Open
+- **Security** : None
 
 Once done, you can move to the creation of the policy profile that will be linked to the policy profile through the policy tag. 
 
 ### Policy profile configuration
 
 You then need to create a new policy profile where you will configure the following information : 
-
-| Name  | Status  | WLAN switching policy  | VLAN  |
-|----------|----------|----------|----------|
-| PP_VLAN_30    | Enabled    | Central switching : disabled<br />Central Authentication : enabled<br />Central DHCP : disabled| 30 |
-
+- **Name** : PP_VLAN_30
+- **Status** : Enabled
+- **WLAN switching policy** :
+    - Central switching : disabled
+    - Central authentication : enabled 
+	- Central DHCP : disabled
+- **VLAN** : 30
 
 ### Policy tag configuration
 
 Now, it's time to **tie the WLAN configuration with the policy profile**. This is done using the "policy tags". Under "Policy tags", select the default policy tag and add your newly created WLAN and associated policy profile and save.
 
-C**heck that your access point is correclty configured** : go to `Monitoring > Wireless > AP Statistics` and click the first blue icon next to your access point name. This will show you what is being broadcasted by your access point.
+**Check that your access point is correclty configured** : go to `Monitoring > Wireless > AP Statistics` and click the first blue icon next to your access point name. This will show you what is being broadcasted by your access point.
 
-![APs SSIDs]({{ site.baseurl }}/images/AP-broadcast.png)
+![APs SSIDs]({{ site.baseurl }}/images/ap-broadcast.png)
 
 ### Connect your wireless client
 
@@ -239,17 +236,19 @@ Group 1 : Will configure the sniffer mode access point
 Group 2 : Will configure the access point channel to a custom channel and handle client connections/disconnections
 
 Odd pod number will configure their access point to sniff on a specific channel :
-
-| Pod 1  | Pod 3  | Pod 5  | Pod 7  | Pod 9  |
-|----------|----------|----------|----------|----------|
-| Sniff on 36   | Sniff on 40    | Sniff on 44   | Sniff on 48    | Sniff on 52    |
+- **Pod 1** : Sniff on channel 36
+- **Pod 3** : Sniff on channel 40
+- **Pod 5** : Sniff on channel 44
+- **Pod 7** : Sniff on channel 46
+- **Pod 9** : Sniff on channel 52
 
 Even pod number will configure their access point to broadcast on a specific channel :
 
-| Pod 2  | Pod 4  | Pod 6  | Pod 8  | Pod 10  |
-|----------|----------|----------|----------|----------|
-| Broadcast on 36    | Broadcast on 40    | Broadcast on 44    | Broadcast on 48    | Broadcast on 52  |
-
+- **Pod 2** : Broadcast on channel 36
+- **Pod 4** : Broadcast on channel 40
+- **Pod 6** : Broadcast on channel 44
+- **Pod 8** : Broadcast on channel 46
+- **Pod 10** : Broadcast on channel 52
 
 ### Group 1 : Configure an access point in sniffer mode
 
