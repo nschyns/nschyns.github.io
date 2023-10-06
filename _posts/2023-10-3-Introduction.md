@@ -34,12 +34,12 @@ In this lab, we will used the following components :
 Each pod will get a different port assigned to which to connect to, shown in the diagram above.
 
 ### 3750 switch configuration
-The first thing you will need to do is to connect your 3750 switch to your assigned port on the main 3750 switch. This interface on your pod switch will need to be in **access mode, accessing VLAN X (given by instructor)**.
+The first thing you will need to do is to connect your 3750 switch to your assigned port on the main 3750 switch. This interface on your pod switch will need to be in **access mode, accessing VLAN 2 (given by instructor)**.
 
-However, there are no DHCP pool configured for this VLAN yet. Configure a DHCP pool for VLAN X on your switch : 
-1. Create an SVI in VLAN X and assign the IP address : 192.168.2.254
-2. Create a DHCP pool for VLAN X (network : 192.168.2.0/24, gateway : 192.168.2.254)
-3. Set the interace where your wired client is connected to access mode, access VLAN X
+However, there are no DHCP pool configured for this VLAN yet. Configure a DHCP pool for VLAN 2 on your switch : 
+1. Create an SVI in VLAN 2 and assign the IP address : 192.168.2.254
+2. Create a DHCP pool for VLAN 2 (network : 192.168.2.0/24, gateway : 192.168.2.254)
+3. Set the interace where your wired client is connected to access mode, access VLAN 2
 
 At this point, your wired client should get an IP address in VLAN X and you should be able to ping your controller IP address (192.168.2.204). 
 
@@ -239,9 +239,7 @@ It is also possible to get some profiling information about the clients connecte
 - **DHCP profiling** : uses information present in the DHCP packets 
 - **HTTP profiling** : uses information present in the HTTP packets 
 
-In order for Local profiling to work, simply enable "Device Classification" under Configuration > Wireless > Wireless Global. This option enables MAC OUI, HTTP and DHCP profiling at the same time :
-
-![Device profiling]({{ site.baseurl }}/images/device-profiling.png)
+In order for Local profiling to work, simply enable "Device Classification". This option enables MAC OUI, HTTP and DHCP profiling at the same time :
 
 You can then go to `Monitoring > Services > Local profiling` to see how the 9800 controller detected your devices.
 
