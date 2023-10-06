@@ -87,7 +87,7 @@ FIRST : add a default gateway on the 9800 controller :
 `ip route 0.0.0.0 0.0.0.0 192.168.2.254`
 
 Therefore, to accomplish this task, you will need to do the following :
-1. Create an SVI on the switch for VLAN 100 (random VLAN number, another can be used) and assign an IP address. Example : 192.168.10.254
+1. Create an SVI on the switch for VLAN 100 (random VLAN number, another can be used) and assign an IP address. Example : 192.168.100.254
 2. Create a DHCP pool for your this network
 3. In this DHCP pool, you will need to configure the option 43. This will be used by the AP to learn the IP address of the WLC. [How do I calculate option 43 ?](#option-43)
 4. Once done, configure the switchport interface as a trunk interface and configure the native VLAN on this trunk to be the VLAN created above. This will allow the AP to request a DHCP address in the pool configured earlier. 
