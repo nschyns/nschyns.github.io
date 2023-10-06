@@ -21,11 +21,33 @@ Here is a brief summary of the steps involved in this lab :
 7. Step 7 : Perform an OTA (Over the Air) capture (instructor led)
 8. Step 8 : Use the Cubietruck and ZoiPer over wireless
 
+## Lab topology
+
+In this lab, we will used the following components : 
+- A 9800 wireless controller, already deployed in a virtual infrastructure
+- A 3750 PoE switch, on which you will connect the access point and wired devices
+- A wireless client (mobile phone, laptop etc.)
+- A wired client (laptop) to access the 9800 controller interface
+
+![Topology]({{ site.baseurl }}/images/topology.png)
+
+Each pod will get a different port assigned to which to connect to, shown in the diagram above.
+
+### 3750 switch configuration
+The first thing you will need to do is to connect your 3750 switch to your assigned port on the main 3750 switch. This interface on your pod switch will need to be in **access mode, accessing VLAN X (given by instructor)**.
+
+However, there are no DHCP pool configured for this VLAN yet. Configure a DHCP pool for VLAN X on your switch : 
+1. Create an SVI in VLAN X and assign the IP address : 192.168.2.254
+2. Create a DHCP pool for VLAN X (network : 192.168.2.0/24, gateway : 192.168.2.254)
+3. Set the interace where your wired client is connected to access mode, access VLAN X
+
+At this point, your wired client should get an IP address in VLAN X and you should be able to ping your controller IP address (192.168.2.204). 
+
 ## Step 1 : Access the 9800 wireless controller
 
 The very first thing you will do during this session is to access the 9800 controller using SSH and the Graphical User Interface (GUI). Using the GUI is one of the preferred way to configure the controller, but SSH access is usually also required to perform some tasks.
 
-In this lab, you can setup a static IP address on your laptop in the same range/VLAN as the wireless controller (IP address of the WLC is : 192.168.2.204). The VLAN will be given by your instructor. Make sure you have IP reachability towards the 9800 controller before going further in this lab.
+Make sure you have IP reachability towards the 9800 controller before going further in this lab.
 
 ### GUI access 
 
@@ -62,10 +84,11 @@ The next step is to join your access point (AP) to your controller. To join a li
 ![AP Join]({{ site.baseurl }}/images/ap-join.png)
 
 Therefore, to accomplish this task, you will need to do the following :
-1. Create a DHCP pool for your managment VLAN (VLAN used for the access points, choose any VLAN)
-2. In this DHCP pool, you will need to configure the option 43. This will be used by the AP to learn the IP address of the WLC. [How do I calculate option 43 ?](#option-43)
-3. Once done, configure the switchport interface as a trunk interface and configure the native VLAN on this trunk to be the management VLAN. This will allow the AP to request a DHCP address in the pool configured earlier. 
-4. Once the AP got an IP address, check that you can ping the WLC and that the AP learned the IP address of the controller. Use the command `show capwap client rcb` on the AP to see if it learned the IP address of the WLC.
+1. Create an SVI on the switch for VLAN 100 (random VLAN number, another can be used) and assign an IP address. Example : 192.168.10.254
+2. Create a DHCP pool for your this network
+3. In this DHCP pool, you will need to configure the option 43. This will be used by the AP to learn the IP address of the WLC. [How do I calculate option 43 ?](#option-43)
+4. Once done, configure the switchport interface as a trunk interface and configure the native VLAN on this trunk to be the VLAN created above. This will allow the AP to request a DHCP address in the pool configured earlier. 
+5. Once the AP got an IP address (`#show ip interface brief`), check that you can ping the WLC and that the AP learned the IP address of the controller. Use the command `show capwap client rcb` on the AP to see if it learned the IP address of the WLC.
 
 #### Option 43
 
@@ -177,7 +200,7 @@ You then need to create a new policy profile where you will configure the follow
 - **WLAN switching policy** :
     - Central switching : disabled
     - Central authentication : enabled 
-	- Central DHCP : disabled
+    - Central DHCP : disabled
 - **VLAN** : 30
 
 ### Policy tag configuration
