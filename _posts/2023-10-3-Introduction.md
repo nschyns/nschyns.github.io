@@ -34,7 +34,7 @@ In this lab, we will used the following components :
 Each pod will get a different port assigned to which to connect to, shown in the diagram above.
 
 ### 3750 switch configuration
-The first thing you will need to do is to connect your 3750 switch to your assigned port on the main 3750 switch. This interface on your pod switch will need to be in **access mode, accessing VLAN 2 (given by instructor)**.
+The first thing you will need to do is to connect your 3750 switch to your assigned port on the main 3750 switch. This interface on your pod switch will need to be in **access mode, accessing VLAN 2**.
 
 However, there are no DHCP pool configured for this VLAN yet. Configure a DHCP pool for VLAN 2 on your switch : 
 1. Create an SVI in VLAN 2 and assign the IP address : 192.168.2.254
