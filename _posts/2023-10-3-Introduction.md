@@ -54,13 +54,13 @@ Make sure you have IP reachability towards the 9800 controller before going furt
 Check if you can access the 9800 GUI using a browser :
 `https://<WLC_IP_ADRESS>`
 
-Enter the username/password provided by your instructor to access the main dashboard. You should get a page similar to this one : 
+Enter the username/password provided by your instructor (admin/P@ssw0rd) to access the main dashboard. You should get a page similar to this one : 
 
 ![Main dashboard]({{ site.baseurl }}/images/dashboard.png)
 
 You are now able to access the 9800 wireless controller and ready to start ! 
 
-### SSH access 
+### SSH access (optional)
 
 To access the 9800 controller using SSH, you will need to enable SSH on the device. The configuration is the same as on any other Cisco device. You will need to check the following things : 
 - Is SSH enabled on the device ?
@@ -82,6 +82,9 @@ The next step is to join your access point (AP) to your controller. To join a li
 - IP reachability towards the controller
 
 ![AP Join]({{ site.baseurl }}/images/ap-join.png)
+
+FIRST : add a default gateway on the 9800 controller : 
+`ip route 0.0.0.0 0.0.0.0 192.168.2.254`
 
 Therefore, to accomplish this task, you will need to do the following :
 1. Create an SVI on the switch for VLAN 100 (random VLAN number, another can be used) and assign an IP address. Example : 192.168.10.254
