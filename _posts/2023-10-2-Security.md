@@ -1,12 +1,293 @@
 ---
 layout: post
-title: Securing the wireless network
+title: QoS in the wireless networks (with 802.1X)
 ---
 
-This lab is designed to introduce the fundamental concepts of security within wireless networks
+This lab is designed to introduce the fundamental concepts of QoS and 802.1X within wireless networks
 
-![_config.yml]({{ site.baseurl }}/images/security.jpeg)
+![QoS]({{ site.baseurl }}/images/qos.png)
 
-## Introduction
+# Introduction
 
-Lab in progress...
+In this lab, you will learn the basic concepts of QoS over Wifi and analyze the effect of properly configuring Qos on your wireless network. You will first make a phone call test without any QoS on a saturated channel, then we will implement QoS on the wireless controller and verify the impact it has. We will also setup a 802.1X SSID to help us implementing AAA override for QoS policies for better management. 
+
+Here is a brief summary of the steps involved in this lab :
+1. Step 1 : Ensure that you can make a phone call over wireless
+2. Step 2 : Increase the traffic load on a specific channel
+3. Step 3 : Implement QoS on the wired network 
+4. Step 4 : Implement QoS on the wireless network and notice the improvement
+5. Step 5 : Take an OTA to verify the QoS tags applied to the frames
+6. Step 6 : Create a 802.1X SSID with ISE
+7. Step 7 : Send QoS policies and VLAN using ISE
+
+## Topology
+
+During our last session, we joined an access point to the wireless controller and configured a basic Open SSID. We will re-use this configuration to continue our lab and play around with QoS over Wi-Fi.
+
+As a reminder, here is the topology of your lab and how it should be configured prior starting the lab :
+
+![Topology]({{ site.baseurl }}/images/topology-full.png)
+
+Reminder of the port/pod mapping on the **VM switch** : 
+- Pod 1 : port 23
+- Pod 2 : port 24
+- Pod 3 : port 25
+- Pod 4 : port 26
+- Pod 5 : port 31
+- Pod 6 : port 32
+- Pod 7 : port 35
+- Pod 8 : port 36
+- Pod 9 : port 37
+- Pod 10 : port 38
+
+VLANs configured on your 3750 switch, with a DHCP pool : 
+- VLAN 2 (management VLAN) : 192.168.2.0/24
+- VLAN 3 (Cubietruck VLAN) : 192.168.1.0/24
+- VLAN 10 (APs VLAN) : 192.168.10.0/24
+- VLAN 30 (Wireless clients VLAN) : 192.168.30.0/24
+- VLAN 40 (Wireless clients VLAN) : 192.168.40.0/24
+
+Make sure that you have an SVI for these VLANs, the VLAN configured and a working DHCP pool for all the VLANs. 
+
+Here is a little checklist to perform before going any further :
+- [x] Can you access the 9800 controller GUI ? 
+- [x] Is your AP joined to your controller ?
+- [x] Is your open SSID broadcasted ?
+- [x] Can you connect your wireless client to your SSID (client should be in RUN state) ? 
+
+If you need any help, please ask your instructor before going further.
+
+## Step 1 : Ensure that you can make a phone call over wireless
+
+You can first connect a wired phone to your switch, place it in VLAN 30 or 40 (depending on the VLAN you configured for the Open SSID). This will allow us to make a phone call between a wireless device and a wired device.
+
+After this, make sure that you can have a phone call between your mobile phone and the wired phone. If you cannot manage to do this, please call your instructor. 
+
+## Step 2 : Increase the traffic load on a specific channel
+
+The goal will be to set multiple access points on the same channel to force channel utilization and simulate a busy environment to degrade the phone calls quality.
+
+There are 10 pods that we will separate in 2 groups : 
+- Pod 1 → 5 will broadcast their SSID on **channel 36**
+- Pod 6 → 10 will broadcast their SSID on **channel 44**
+
+### Change the operating channel on the access point
+
+To change the channel currently being used, you can go to `Configuration > Wireless > Acces Point`, under the 5Ghz band, select the access point and under `RF Channel Assignment`, change the Assignment method to "Custom" and then select a channel of 20Mhz and select the channel assigned to your pod.
+
+You should see the effect of this by going to `Monitoring > Wireless > AP Statistics`, click on the AP and under the 360° view,  you should see the channel used for the 5Ghz band and also the current channel utilization.
+
+### Generate traffic to a wireless client
+
+Next step will be to send traffic to a connected wireless client. This will make the air "busier" and the channel utilization should go up. This simulates a busy network where a lot of clients are connected and generating data. 
+
+To do this, please follow instructions given by the teacher. 
+
+## Step 3 : Implement QoS on the wired network
+
+The first thing we will do is to verify that the wired phone is sending the packets with a DSCP tags. The IP phone should be marking the traffic before sending it.
+
+### Verify the presence of the DSCP tag
+
+To verify this, you will need to make a packet capture on the switchport where the wired phone is connected and make a phone call.
+
+Once done, stop the capture and analyze it to verify that the DSCP tag is present.
+
+### Configure the switch to preserve the DSCP tag
+
+To be continued...
+
+## Step 4 : Implement QoS on the wireless network 
+
+Now, it is time to improve the quality of the call over the wireless network. To do this, we will need to apply a change on the 9800 wireless controller. You will use a Platinum QoS on your WLAN.
+
+On your 9800 controller, navigate to the policy profile being used for your open SSID and change the "QoS SSID Policy" setting under "QoS and AVC" tab of the policy profile. Set it to platinum. 
+
+![Platinum]({{ site.baseurl }}/images/platinum-pp.png)
+
+Once applied, you can try to make a phone call again and notice if the phone quality improved. 
+
+## Step 5 : Take an OTA to verify the QoS tags applied to the frames
+
+The next step will be to observe the change that we made on the policy profile by taking an Over the Air (OTA) capture. The point will be to check in this packet capture if the UP (User Priority) can be observed on the frames. To do this, we will put one access point in sniffer mode, and another access point will be used to broadcast the SSID. 
+
+You will work by pair of 2 groups : one group will sniff the air, while the other will make the phone call and generate the traffic. 
+
+- **Pod 1 & 2** : Use channel 36
+- **Pod 3 & 4** : Use channel 40
+- **Pod 5 & 6** : Use channel 44
+- **Pod 7 & 8** : Use channel 46
+- **Pod 9 & 10** : Use channel 52
+
+### Group 1 : Configure an access point in sniffer mode
+
+To configure an access point in sniffer mode, you will need to go to `Configuration > Wireless > Access Points`, select the access point, the change the "AP mode" to "Sniffer". The AP will rejoin the WLC and you will then be able to configure the sniffing channel and where to send the captured data.
+
+To configure on which channel the AP will be listening, go to `Configuration > Wireless > Access Points`, expand the 5ghz band section, select the access point, then enable sniffing, select the channel you will sniff on and specify the IP address of the laptop on which Wireshark will run. 
+
+In the "RF Channel Assignment" section, please make sure to set the assignment method to "Custom" and specify the channel width to 20Mhz and set the channel to the one you would like to sniff on (see table above). 
+
+The data you will capture over the air needs to be sent somewhere. In our case, it will be a wired laptop (in the same VLAN of the controller), running Wireshark. 
+
+Side note : ensure that the 9800 controller can reach the laptop running Wireshark, using a ping for example. 
+
+#### Decode captured data
+
+At this point, the AP is forwarding every packets seen on the channel you are sniffing on. However, these packets are encapsulated and you will need to decode them to see their content. To do this, you can stop the capture, right-click on a packet, select "Decode As" and then select "PEEKREMOTE".
+
+![PEEKREMOTE]({{ site.baseurl }}/images/peekremote.png)
+
+Wait for group 2 to finish its work and then try to start the capture, make the phone call and stop the capture and then analyze the packets. 
+
+### Group 2 : Configure the channel of the access point
+
+Please refer to the [**Change the operating channel on the access point**](#change-the-operating-channel-on-the-access-point) section above.
+
+You should see something similar to this on the frames sent to/from the wireless client making the phone call : 
+
+![UP value]({{ site.baseurl }}/images/up-value.png)
+
+## Step 6 : Create a 802.1X SSID with ISE
+
+![Topology with ISE]({{ site.baseurl }}/images/ise-topology.png)
+
+Now, we will implement QoS policies to the client using ISE, using the AAA override feature. This will allow us to specify which QoS policies to apply to which clients, on the same SSID. This can be useful for example to reduce the number of SSIDs and apply policies depending on who is connecting to the SSID (you can choose the VLAN, the QoS policy etc.)
+
+First of all, we will configure a simple 802.1X SSID without AAA override. You can find a complete and detail guide at [this link](https://www.cisco.com/c/en/us/support/docs/wireless/catalyst-9800-series-wireless-controllers/213919-configure-802-1x-authentication-on-catal.html), but you will find the necessary information below for this lab.
+
+### Configure the 9800 
+
+We will start by configuring a new SSID on the 9800 and configure it to use a RADIUS server for this WLAN
+
+#### Create a new RADIUS server
+
+Navigate to `Configuration > Security > AAA > Servers / Groups > RADIUS > Servers > + Add` and enter the RADIUS server information.
+
+- Server Address : 192.168.2.200
+- Key : cisco!123
+
+#### Create a new RADIUS server group
+
+Add the RADIUS server to a RADIUS group. Navigate to `Configuration > Security > AAA > Servers / Groups > RADIUS > Server Groups > + Add`. Give a name to your group and move the server you created earlier in the list of Assigned Servers.
+
+#### Create AAA method list (dot1x)
+
+Create an Authentication Method List. Navigate to `Configuration > Security > AAA > AAA Method List > Authentication > + Add` and use the following values : 
+
+- **Type** : dot1x
+- **Group type** : group
+- **Assigned servers group** : the server group you created earlier
+
+![AAA method]({{ site.baseurl }}/images/aaa-method.png)
+
+#### Create a new WLAN
+
+Create a new WLAN with the following values : 
+- **Name** : Pod-X-Dot1x
+- **Status** : Enabled
+- **Security** : make sure the 802.1X AKM is enabled (by default)
+- Under AAA tab (under Security), select the method list created earlier
+
+The WLAN should look like this : 
+
+![802.1X SSID]({{ site.baseurl }}/images/dot1x-ssid.png)
+
+#### Create a new policy profile
+
+Create a new policy profile with the following values : 
+- **Name** : PP_802.1X
+- **Status** : Enabled
+- **WLAN switching policy** :
+    - Central switching : disabled
+    - Central authentication : **enabled **
+	- Central DHCP : disabled
+	- Central association : disabled
+- **VLAN** (under Access Policies) : 30 or 40
+
+#### Add the WLAN to your default policy tag
+
+You can now add you newly created WLAN and policy profile to the default policy tag. After this, you should see the 802.1X being broadcasted.
+
+**Check that your access point is correclty configured** : go to `Monitoring > Wireless > AP Statistics` and click the first blue icon next to your access point name. This will show you what is being broadcasted by your access point.
+
+![APs SSIDs]({{ site.baseurl }}/images/ap-broadcast.png)
+
+It is now time to configure ISE for the 802.1X authentication !
+
+### Configure your ISE server
+
+We will now need to configure the ISE server : add the the network device (the 9800 controller), add a test user and set the policies to match the 802.1X authentication.
+
+#### Add the 9800 as a network device 
+
+Open the ISE console (creds : admin/P@ssw0rd) and navigate to `Administration > Network Resources > Network Devices > Add` and add a new network device.
+
+- **Name** : 9800-WLC
+- **IP Address** : 192.168.2.204 (your WLC)
+- Check the **RADIUS Authentication Setting** and enter the shared secret (the same configured on the controller)
+
+#### Create a new test user
+
+Navigate to `Administration > Identity Management > Identities > Users > Add` and add a new test user :
+
+- **Username** : test
+- **Password** : Cisco1234
+
+#### Configure the policies 
+
+The point here will be now to configure the policies to match the 802.1X authentication flow.
+
+Go to `Policy > Policy Sets` and select the default policy set. Inside the policy set, you have the authentication policies and the authorization policies. 
+
+Configure them to match the 802.1X traffic and return the Authorization profile "PermitAccess". We will create our own Authorization profile later in the lab to return custom attributes. 
+
+### Test the authentication
+
+Connect your wirless client to your 802.1X SSID and test the authentication. Keep in mind that the wireless client on the 9800 controller should show in RUN state if the authentication succeeded.
+
+To troubleshoot the authentication, you can either go on ISE to check the RADIUS live logs or perform a Radio Active trace on the 9800 to see the communication between the 9800 and the ISE server.
+
+#### RADIUS live logs
+
+Go to `Operations > RADIUS > Live Logs` and you see the list of authentication requests, as well as the Policy Set that was matched, the result for each request, and so on. You can get more details if you click the magnifying glass under the Details tab of each line.
+
+#### Radio Active trace 
+
+Go to `Troubleshooting > Radioactive Trace > + Add` and specify the MAC/IP address of the client(s) you want to troubleshoot. Click "Start", reproduce the issue and then generate the RA trace for the last 10 minutes. This log will give you all the information needed to understand the root cause of the issue. You can reach out to your instructor if help is needed.
+
+## Step 7 : Send QoS policies and VLAN using ISE
+
+The point here is to allow specific users to have a certain QoS policiy, while other users will have a different QoS policy applied. 
+
+Example scenario : we want to give the teachers a better QoS policy than to the students on the same SSID. 
+
+### Modify the policy profile
+
+THe first thing will be to remove the QoS policy previously defined on the policy profile.
+
+Then, to allow attributes to be pushed by the RADIUS server, you will need to enable AAA override under the "Advanced" tab of the policy profile.
+
+![AAA Override]({{ site.baseurl }}/images/aaa-override.png)
+
+### Configure a new Authorization profile on ISE
+
+You will now need to create a new authorization profile on ISE to send the attributes to the 9800 when the authentication suceeded.
+
+The Authorization Profile consists of a set of attributes that are returned when a condition is matched. The authorization profile determines if the client has access or not to the network, push Access Control Lists (ACLs), VLAN override or any other parameter. The authorization profile shown in this example sends an access accept for the client and assigns the client to a specific QoS policy.
+
+Navigate to `Policy > Policy Elements > Results > Authorization > Authorization Profiles` and click the Add button.
+
+Parameters : 
+- **Name** : TeacherQos
+- **Access Type** : Access Accept
+- Under **Advanced Attribute Settings**, create 2 new AV pairs. The attributes are ip:sub-qos-policy-in=platinum-up and ip:sub-qos-policy-out=platinum. 
+
+![AV Pair]({{ site.baseurl }}/images/avpair.png)
+
+#### Bind the new authorization profile with the authorization policy 
+
+Under the authorization policy created earlier, assign the authorization profile "TeacherQos".
+
+#### Test the setup
+
+You can now connect a new wireless client to the 802.1X SSID and you should see the QoS policy aplied to this client. You can verify this by going to `Monitoring > Wireless > Clients`, click on the client, under the "General" tab and "Security Information", you should see at the bottom the name of the QoS policy applied. 
