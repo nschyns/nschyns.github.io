@@ -63,6 +63,8 @@ Once the console is open :
 
 [nschyns] > service mk9h-kku8-p35k no-sr
 Connecting to Service: mk9h-kku8-p35k without SR context
+
+[nschyns@mk9h-kku8-p35k] > show inventory
 ```
 
 To access your device, simply type `interactive wlcX`, where X is the WLC number assigned to you :
@@ -98,14 +100,23 @@ In the **Radkit Network Console**, you can start an HTTP proxy using the followi
 [nschyns@mk9h-kku8-p35k] > proxy start http 4000
 ```
 
-Then access the following link using a browser : [http://localhost:4000](http://localhost:4000/). Select the service number.
+### Firefox users
+
+You need to do a small configuration on the browser to make this working. Go to the Settings, search for "Proxy", then click "Settings". 
+![Firefox proxy]({{ site.baseurl }}/images/firefox_proxy.png)
+
+Under the "Automatic Proxy Configuration URL", enter the following value and click OK : https://prod.radkit-cloud.cisco.com/pac?port=4000&protocol=HTTP
+
+![Firefox proxy]({{ site.baseurl }}/images/connection_settings.png)
+
+Then access the following link : [https://index.proxy/](https://index.proxy/). Select the service number.
 
 ![HTTP proxy]({{ site.baseurl }}/images/http_proxy.png)
 
 You should see the wireless controller that is assigned to you. Click on the "Go to web page" link.
 ![HTTP access]({{ site.baseurl }}/images/http_wlc.png)
 
-You should now be able to access the wireless controller GUI.
+Accept the security warning (self signed certificates) and you should now see the Day-0 Wizard to configure the wireless controller.
 
 ## Step 4 : Run a python script using Radkit
 
