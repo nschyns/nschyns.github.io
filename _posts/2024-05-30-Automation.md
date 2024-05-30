@@ -118,6 +118,28 @@ You should see the wireless controller that is assigned to you. Click on the "Go
 
 Accept the security warning (self signed certificates) and you should now see the Day-0 Wizard to configure the wireless controller.
 
+![Day 0 Wizard]({{ site.baseurl }}/images/day0.png)
+
 ## Step 4 : Run a python script using Radkit
 
+Radkit has even more under the hood! You can actually build your own Python script (for example to reset or configure a network device with a specific configuration) and leverage Radkit to execute the script ! Check out how fast and easy this is.
+
+### Download and check the script
+
+First, download the following [python script]() on your computer.
+
+You can open it and review it using your favorite python editor.
+
+### Run the script
+
+How can we run this script ? Easy ! Execute the following command from a command line interface :
+`radkit-client script radkit-test-script.py myccoid@cisco.com wlcX`
+
+Example :
+`radkit-client script radkit-test-script.py ndarchis@cisco.com wlc1`
+
 ## Step 5 : Verify the result of the script
+
+Once the script is executed, you can verify if it worked. Go to [https://index.proxy/](https://index.proxy/), select the service number, and open the Web page of your WLC. You should now see the dashboard of the wireless controller instead of the Day 0 wizard. This is because the script added a configuration (`wireless country XX`) which has the effect to disable the day 0 configuration wizard.
+
+![9800 dashboard]({{ site.baseurl }}/images/9800_dashboard.png)
