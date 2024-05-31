@@ -126,9 +126,13 @@ Radkit has even more under the hood! You can actually build your own Python scri
 
 ### Download and check the script
 
-First, download the following [python script]() on your computer.
+First, download the following [python script][1] on your computer.
 
-You can open it and review it using your favorite python editor.
+[1]:{{ site.url }}/download/radkit-test-script.py
+
+You can open it and review it using your favorite python editor. This script does the following operation : 
+- Check if a country code is configured on the WLC. If no country code is configure, then you will land on the Day-0 wizard.
+- If the country code is not configured, then it configures the BE country code and also configure the wireless management interface (WMI)
 
 ### Run the script
 
