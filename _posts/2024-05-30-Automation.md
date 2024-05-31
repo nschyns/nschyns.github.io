@@ -136,10 +136,10 @@ You can open it and review it using your favorite python editor. This script doe
 
 ### Run the script
 
-How can we run this script ? Easy ! Execute the following command from a command line interface :
+How can we run this script ? Easy ! Execute the following command from a command line interface :  
 `radkit-client script radkit-test-script.py myccoid@cisco.com wlcX`
 
-Example :
+Example :  
 `radkit-client script radkit-test-script.py ndarchis@cisco.com wlc1`
 
 ## Step 5 : Verify the result of the script
